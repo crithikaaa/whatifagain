@@ -1,13 +1,12 @@
-import Configuration, { OpenAIApi } from "openai"
+import OpenAI from "openai"
 import { NextResponse } from "next/server"
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
-const openai = new OpenAIApi(configuration)
 
 export async function POST(req: Request) {
-  if (!configuration.apiKey) {
+  if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
   }
 
@@ -18,22 +17,19 @@ export async function POST(req: Request) {
   }
 
   try {
-    const completion = await openai.createCompletion({
-      model: "text-davinci-003",
+    const completion = await openai.completions.create({
+      model: "gpt-3.5-turbo-instruct",
       prompt: `Explain the 'What If?' scenario: ${question} in a creative and fun way.`,
       max_tokens: 200,
       temperature: 0.8,
     })
 
-    return NextResponse.json({ text: completion.data.choices[0].text?.trim() })
-  } catch (error: any) {
-    if (error.response) {
-      console.error(error.response.status, error.response.data)
-      return NextResponse.json({ error: error.response.data }, { status: error.response.status })
-    } else {
-      console.error(`Error with OpenAI API request: ${error.message}`)
-      return NextResponse.json({ error: "An error occurred during your request." }, { status: 500 })
+    return NextResponse.json({ text: completion.choices[0].text?.trim() })
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error:", error.message)
     }
+    return NextResponse.json({ error: "An error occurred during your request." }, { status: 500 })
   }
 }
 
