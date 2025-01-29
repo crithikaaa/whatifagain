@@ -1,6 +1,7 @@
 import OpenAI from "openai"
 import { NextResponse } from "next/server"
 
+// Move this outside of the handler function
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
