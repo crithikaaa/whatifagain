@@ -4,7 +4,9 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { AlertCircle, Loader2 } from "lucide-react"
+import { SaveButton } from "@/components/SaveButton"
 
 export default function Home() {
   const [question, setQuestion] = useState("")
@@ -57,11 +59,18 @@ export default function Home() {
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Ask your &apos;What If?&apos; question..."
+            placeholder="Ask your 'What If?' question..."
             className="w-full"
           />
           <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? "Imagining..." : "Imagine"}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Imagining...
+              </>
+            ) : (
+              "Imagine"
+            )}
           </Button>
         </div>
       </form>
@@ -73,15 +82,28 @@ export default function Home() {
         </Alert>
       )}
       {answer && (
-        <div className="mt-8 w-full max-w-md">
-          <h2 className="text-2xl font-semibold mb-4">Here&apos;s what I imagined:</h2>
-          <p className="text-lg">{answer}</p>
-        </div>
+        <Card className="mt-8 w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Here's what I imagined:</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-lg">{answer}</p>
+          </CardContent>
+        </Card>
       )}
       {videoUrl && (
-        <div className="mt-8 w-full max-w-md">
-          <h2 className="text-2xl font-semibold mb-4">Visual representation:</h2>
-          <video src={videoUrl} controls autoPlay loop muted className="w-full rounded-lg shadow-lg" />
+        <Card className="mt-8 w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Visual representation:</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <video src={videoUrl} controls autoPlay loop muted className="w-full rounded-lg shadow-lg" />
+          </CardContent>
+        </Card>
+      )}
+      {answer && videoUrl && (
+        <div className="mt-4">
+          <SaveButton question={question} answer={answer} videoUrl={videoUrl} />
         </div>
       )}
     </main>
