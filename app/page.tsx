@@ -17,23 +17,29 @@ export default function Home() {
     setAnswer("")
     setImageUrl("")
 
+    console.log("Submitting question:", question)
+
     try {
       // Generate text
+      console.log("Sending request to generate-text API")
       const textResponse = await fetch("/api/generate-text", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question }),
       })
       const textData = await textResponse.json()
+      console.log("Received text response:", textData)
       setAnswer(textData.text)
 
       // Generate image
+      console.log("Sending request to generate-video API")
       const imageResponse = await fetch("/api/generate-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: textData.text }),
       })
       const imageData = await imageResponse.json()
+      console.log("Received image response:", imageData)
       setImageUrl(imageData.imageUrl)
     } catch (error) {
       console.error("Error:", error)
