@@ -1,21 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export default function Home() {
   const [question, setQuestion] = useState("")
   const [answer, setAnswer] = useState("")
-  const [imageUrl, setImageUrl] = useState("")
+  const [videoUrl, setVideoUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setAnswer("")
-    setImageUrl("")
+    setVideoUrl("")
 
     console.log("Submitting question:", question)
 
@@ -31,16 +30,16 @@ export default function Home() {
       console.log("Received text response:", textData)
       setAnswer(textData.text)
 
-      // Generate image
+      // Generate video
       console.log("Sending request to generate-video API")
-      const imageResponse = await fetch("/api/generate-video", {
+      const videoResponse = await fetch("/api/generate-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: textData.text }),
       })
-      const imageData = await imageResponse.json()
-      console.log("Received image response:", imageData)
-      setImageUrl(imageData.imageUrl)
+      const videoData = await videoResponse.json()
+      console.log("Received video response:", videoData)
+      setVideoUrl(videoData.videoUrl)
     } catch (error) {
       console.error("Error:", error)
     } finally {
@@ -71,18 +70,10 @@ export default function Home() {
           <p className="text-lg">{answer}</p>
         </div>
       )}
-      {imageUrl && (
+      {videoUrl && (
         <div className="mt-8 w-full max-w-md">
           <h2 className="text-2xl font-semibold mb-4">Visual representation:</h2>
-          <div className="relative w-full aspect-video">
-            <Image
-              src={imageUrl || "/placeholder.svg"}
-              alt="Generated image"
-              fill
-              className="rounded-lg shadow-lg object-cover"
-              unoptimized={imageUrl?.startsWith("data:")}
-            />
-          </div>
+          <video src={videoUrl} controls autoPlay loop muted className="w-full rounded-lg shadow-lg" />
         </div>
       )}
     </main>
