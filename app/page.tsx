@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -50,7 +51,7 @@ export default function Home() {
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Ask your 'What If?' question..."
+            placeholder="Ask your &apos;What If?&apos; question..."
             className="w-full"
           />
           <Button type="submit" disabled={isLoading} className="w-full">
@@ -60,14 +61,22 @@ export default function Home() {
       </form>
       {answer && (
         <div className="mt-8 w-full max-w-md">
-          <h2 className="text-2xl font-semibold mb-4">Here's what I imagined:</h2>
+          <h2 className="text-2xl font-semibold mb-4">Here&apos;s what I imagined:</h2>
           <p className="text-lg">{answer}</p>
         </div>
       )}
       {imageUrl && (
         <div className="mt-8 w-full max-w-md">
           <h2 className="text-2xl font-semibold mb-4">Visual representation:</h2>
-          <img src={imageUrl || "/placeholder.svg"} alt="Generated image" className="w-full rounded-lg shadow-lg" />
+          <div className="relative w-full aspect-video">
+            <Image
+              src={imageUrl || "/placeholder.svg"}
+              alt="Generated image"
+              fill
+              className="rounded-lg shadow-lg object-cover"
+              unoptimized={imageUrl?.startsWith("data:")}
+            />
+          </div>
         </div>
       )}
     </main>
