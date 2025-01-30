@@ -1,21 +1,17 @@
-import OpenAI from "openai"
 import { NextResponse } from "next/server"
+import { HfInference } from "@huggingface/inference"
 
-console.log("OPENAI_API_KEY:", process.env.OPENAI_API_KEY) // Remove this line before deploying
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+const hf = new HfInference(process.env.HUGGINGFACE_API_KEY)
 
 export async function POST(req: Request) {
   console.log("generate-text API called")
-  if (!process.env.OPENAI_API_KEY) {
-    console.error("OPENAI_API_KEY is not set")
-    return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
+  if (!process.env.HUGGINGFACE_API_KEY) {
+    console.error("HUGGINGFACE_API_KEY is not set")
+    return NextResponse.json({ error: "Hugging Face API key not configured" }, { status: 500 })
   }
 
   const { question } = await req.json()
-  console.log("Received question:", question)
+  console.log("Processing question:", question)
 
   if (!question || question.trim().length === 0) {
     console.error("Invalid question received")
@@ -23,18 +19,22 @@ export async function POST(req: Request) {
   }
 
   try {
-    console.log("Calling OpenAI API")
-    const completion = await openai.completions.create({
-      model: "gpt-3.5-turbo-instruct",
-      prompt: `Explain the 'What If?' scenario: ${question} in a creative and fun way.`,
-      max_tokens: 200,
-      temperature: 0.8,
+    console.log("Calling DeepSeek-R1 API...")
+    const response = await hf.textGeneration({
+      model: "deepseek-ai/DeepSeek-R1",
+      inputs: `Explain the 'What If?' scenario in a creative and fun way: ${question}`,
+      parameters: {
+        max_new_tokens: 200,
+        temperature: 0.7,
+        top_p: 0.95,
+        repetition_penalty: 1.15,
+      },
     })
-    console.log("OpenAI API response received")
-    return NextResponse.json({ text: completion.choices[0].text?.trim() })
+    console.log("DeepSeek-R1 API response received successfully")
+    return NextResponse.json({ text: response.generated_text })
   } catch (error) {
-    console.error("Error in OpenAI API call:", error)
-    return NextResponse.json({ error: "An error occurred during your request." }, { status: 500 })
+    console.error("Error in DeepSeek-R1 API call:", error)
+    return NextResponse.json({ error: "An error occurred during text generation." }, { status: 500 })
   }
 }
 

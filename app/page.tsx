@@ -3,45 +3,46 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 
 export default function Home() {
   const [question, setQuestion] = useState("")
   const [answer, setAnswer] = useState("")
   const [videoUrl, setVideoUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setAnswer("")
     setVideoUrl("")
-
-    console.log("Submitting question:", question)
+    setError("")
 
     try {
       // Generate text
-      console.log("Sending request to generate-text API")
       const textResponse = await fetch("/api/generate-text", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question }),
       })
       const textData = await textResponse.json()
-      console.log("Received text response:", textData)
+      if (!textResponse.ok) throw new Error(textData.error || "Failed to generate text")
       setAnswer(textData.text)
 
       // Generate video
-      console.log("Sending request to generate-video API")
       const videoResponse = await fetch("/api/generate-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: textData.text }),
       })
       const videoData = await videoResponse.json()
-      console.log("Received video response:", videoData)
+      if (!videoResponse.ok) throw new Error(videoData.error || "Failed to generate video")
       setVideoUrl(videoData.videoUrl)
     } catch (error) {
       console.error("Error:", error)
+      setError(error instanceof Error ? error.message : "An unexpected error occurred")
     } finally {
       setIsLoading(false)
     }
@@ -64,6 +65,13 @@ export default function Home() {
           </Button>
         </div>
       </form>
+      {error && (
+        <Alert variant="destructive" className="mb-8">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       {answer && (
         <div className="mt-8 w-full max-w-md">
           <h2 className="text-2xl font-semibold mb-4">Here&apos;s what I imagined:</h2>
